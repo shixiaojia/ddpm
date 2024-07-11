@@ -40,11 +40,11 @@ class GaussionDiffusion(nn.Module):
         loss = F.mse_loss(self.model(x_t, t), noise, reduction='mean')
         return loss
 
+    @torch.no_grad()
     def sample(self, batch_size, device):
         x = torch.randn(batch_size, self.image_channel, self.image_size, self.image_size, device=device)
 
         for t in reversed(range(self.T)):
-            # t = x_t.new_ones([x_t.shape[0], ], dtype=torch.long) * time_step
             t_batch = torch.tensor([t], device=device).repeat(batch_size)
             x = (x - extract(self.remove_noise_coef, t_batch, x.shape) * self.model(x, t_batch)) * \
                 extract(self.reciprocal_sqrt_alphas, t_batch, x.shape)
